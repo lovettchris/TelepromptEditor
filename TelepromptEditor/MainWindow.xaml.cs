@@ -1,6 +1,10 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -16,6 +20,8 @@ namespace Teleprompter
         TranscriptModel model = new TranscriptModel();
         DelayedActions delayedActions = new DelayedActions();
         bool syncPositions = true;
+        double pendingSeek;
+        Settings settings;
 
         public MainWindow()
         {
@@ -23,14 +29,87 @@ namespace Teleprompter
             InitializeComponent();
             TranscriptView.ItemsSource = model.Entries;
             UpdateButtons();
+            this.Visibility = Visibility.Hidden;
+
+            Task.Run(async () =>
+            {
+                this.settings = await Settings.LoadAsync();
+                this.settings.PropertyChanged += OnSettingsPropertyChanged;
+                UiDispatcher.RunOnUIThread(RestoreSettings);
+            });
+        }
+
+        private void RestoreSettings()
+        {
+            if (settings.WindowLocation.X != 0 && settings.WindowSize.Width != 0 && settings.WindowSize.Height != 0)
+            {
+                // make sure it is visible on the user's current screen configuration.
+                var bounds = new System.Drawing.Rectangle(
+                    XamlExtensions.ConvertFromDeviceIndependentPixels(settings.WindowLocation.X),
+                    XamlExtensions.ConvertFromDeviceIndependentPixels(settings.WindowLocation.Y),
+                    XamlExtensions.ConvertFromDeviceIndependentPixels(settings.WindowSize.Width),
+                    XamlExtensions.ConvertFromDeviceIndependentPixels(settings.WindowSize.Height));
+                var screen = System.Windows.Forms.Screen.FromRectangle(bounds);
+                bounds.Intersect(screen.WorkingArea);
+
+                this.Left = XamlExtensions.ConvertToDeviceIndependentPixels(bounds.X);
+                this.Top = XamlExtensions.ConvertToDeviceIndependentPixels(bounds.Y);
+                this.Width = XamlExtensions.ConvertToDeviceIndependentPixels(bounds.Width);
+                this.Height = XamlExtensions.ConvertToDeviceIndependentPixels(bounds.Height);
+            }
+
+            if (string.IsNullOrEmpty(this.SrtFileName.Text))
+            {
+                this.SrtFileName.Text = this.settings.SrtFile;
+                UpdateSrt();
+            }
+            if (string.IsNullOrEmpty(this.VideoFileName.Text))
+            {
+                this.VideoFileName.Text = this.settings.VideoFile;
+                UpdateVideoLocation(this.settings.Position);
+            }
+
+            this.Visibility = Visibility.Visible;
+        }
+
+
+        private void OnSettingsPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            this.delayedActions.StartDelayedAction("SaveSettings", async () =>
+            {
+                try
+                {
+                    await this.settings.SaveAsync();
+                } 
+                catch
+                {
+                }
+            }, TimeSpan.FromMilliseconds(250));
         }
 
         private void OnMediaFailed(object sender, ExceptionRoutedEventArgs e)
         {
+            if (e.ErrorException != null)
+            {
+                ShowError(e.ErrorException.Message);
+            }
         }
 
-        private void OnOpenFile(object sender, RoutedEventArgs e)
-        {            
+        private void OnBrowseVideo(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog od = new OpenFileDialog();
+            od.Filter = "Video Files (*.mp4)|*.mp4|Movie Files (*.mov)|*.mov|All Files (*.*)|*.*";
+            od.CheckFileExists = true;
+            if (od.ShowDialog() == true)
+            {
+                ShowError("Loading " + od.FileName);
+                VideoFileName.Text = od.FileName; 
+                UpdateVideoLocation();
+            }
+        }
+
+        private void OnBrowseSrt(object sender, RoutedEventArgs e)
+        {
             OpenFileDialog od = new OpenFileDialog();
             od.Filter = "SRT Files (*.srt)|*.srt";
             od.CheckFileExists = true;
@@ -42,8 +121,7 @@ namespace Teleprompter
                 UpdateSrt();
             }
         }
-
-        private void OnSaveFile(object sender, RoutedEventArgs e)
+        private void OnSaveSrt(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(model.FileName))
             {
@@ -78,6 +156,7 @@ namespace Teleprompter
         void UpdateSrt()
         {
             string filename = SrtFileName.Text.Trim('"').Trim();
+            this.settings.SrtFile = filename;
             if (string.IsNullOrEmpty(filename))
             {
                 model.Entries.Clear();
@@ -108,7 +187,7 @@ namespace Teleprompter
             UpdateVideoLocation();
         }
 
-        void UpdateVideoLocation()
+        void UpdateVideoLocation(double position = 0)
         { 
             if (VideoPlayer == null)
             {
@@ -120,6 +199,7 @@ namespace Teleprompter
                 ShowError("");
 
                 string url = VideoFileName.Text.Trim('"').Trim();
+                this.settings.VideoFile = url;
                 if (string.IsNullOrEmpty(url))
                 {
                     StopClock();
@@ -133,6 +213,7 @@ namespace Teleprompter
                     StopClock(); 
                     VideoPlayer.Source = fileName;
                     VideoPlayer.Play();
+                    this.pendingSeek = position;
                 }
             } 
             catch (Exception ex)
@@ -170,6 +251,11 @@ namespace Teleprompter
             {
                 programmedSync = true;
                 PositionSlider.Maximum = VideoPlayer.NaturalDuration.TimeSpan.TotalSeconds;
+                if (this.pendingSeek != 0)
+                {
+                    VideoPlayer.Position = TimeSpan.FromSeconds(this.pendingSeek);
+                    this.pendingSeek = 0;
+                }
                 PositionSlider.Value = VideoPlayer.Position.TotalSeconds;
             } 
             finally
@@ -304,5 +390,28 @@ namespace Teleprompter
             TranscriptEntry entry = (TranscriptEntry)block.DataContext;
             TranscriptView.SelectedItem = entry;
         }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            if (this.settings != null)
+            {
+                this.settings.WindowSize = this.RestoreBounds.Size;
+                this.settings.WindowLocation = this.RestoreBounds.TopLeft;
+                this.settings.Position = VideoPlayer.Position.TotalSeconds;
+                this.delayedActions.CancelDelayedAction("SaveSettings");
+                ManualResetEvent evt = new ManualResetEvent(false);
+                Task.Run(async () =>
+                {
+                    await this.settings.SaveAsync();
+                    evt.Set();
+                });
+
+                evt.WaitOne(5000);
+                Debug.WriteLine("Settings saved");
+            }
+
+            base.OnClosing(e);
+        }
+
     }
 }

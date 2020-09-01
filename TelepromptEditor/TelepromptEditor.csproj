@@ -29,7 +29,7 @@
     <SupportUrl>https://github.com/lovettchris/TelepromptEditor</SupportUrl>
     <ErrorReportUrl>https://github.com/lovettchris/TelepromptEditor</ErrorReportUrl>
     <PublisherName>Chris Lovett</PublisherName>
-    <ApplicationRevision>3</ApplicationRevision>
+    <ApplicationRevision>4</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -78,6 +78,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -100,10 +102,13 @@
     <Compile Include="EditableTextBlock.xaml.cs">
       <DependentUpon>EditableTextBlock.xaml</DependentUpon>
     </Compile>
+    <Compile Include="IsolatedStorage.cs" />
     <Compile Include="SelectedColorConverter.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="TranscriptEntry.cs" />
     <Compile Include="TranscriptModel.cs" />
     <Compile Include="UiDispatcher.cs" />
+    <Compile Include="XamlExtensions.cs" />
     <Page Include="EditableTextBlock.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
