@@ -15,6 +15,7 @@ namespace Teleprompter
     {
         TranscriptModel model = new TranscriptModel();
         DelayedActions delayedActions = new DelayedActions();
+        bool syncPositions = true;
 
         public MainWindow()
         {
@@ -194,6 +195,11 @@ namespace Teleprompter
             }
             var entry = model.FindEntry(seconds);
             model.Select(entry);
+
+            if (syncPositions)
+            {
+                TranscriptView.ScrollIntoView(entry);
+            }
         }
 
         bool playing;
@@ -276,6 +282,27 @@ namespace Teleprompter
         private void OnMediaEnded(object sender, RoutedEventArgs e)
         {
             StopClock();
+        }
+
+        private void OnToggleSync(object sender, RoutedEventArgs e)
+        {
+            syncPositions = !syncPositions;
+        }
+
+        private void OnListSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0)
+            {
+                TranscriptEntry entry = (TranscriptEntry)e.AddedItems[0];
+                VideoPlayer.Position = TimeSpan.FromSeconds(entry.StartSeconds);
+            }
+        }
+
+        private void OnItemEditing(object sender, EventArgs e)
+        {
+            EditableTextBlock block = (EditableTextBlock)sender;
+            TranscriptEntry entry = (TranscriptEntry)block.DataContext;
+            TranscriptView.SelectedItem = entry;
         }
     }
 }

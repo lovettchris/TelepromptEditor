@@ -15,7 +15,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <TextBlock Text="{Binding Path=Range}" Foreground="#FF9C9292"/>
-                <local:EditableTextBlock Grid.Row="1" Label="{Binding Path=Prompt, Mode=TwoWay}" Width="{Binding Width}"/>
+                <local:EditableTextBlock Grid.Row="1" Label="{Binding Path=Prompt, Mode=TwoWay}" Width="{Binding Width}" TextBoxFocussed="OnItemEditing"/>
             </Grid>
         </DataTemplate>
         <Style x:Key="ListItemStretch" TargetType="ListViewItem">
@@ -92,12 +92,24 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <Button x:Name="PlayButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Play" Grid.Column="0" Click="OnPlay">&#xE102;</Button>
                     <Button x:Name="PauseButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Pause" Grid.Column="1" Click="OnPause">&#xE103;</Button>
                     <Slider x:Name="PositionSlider" Margin="0,5,5,5" Minimum="0" Maximum="100" Grid.Column="2" ValueChanged="OnSliderMoved"
                             VerticalAlignment="Center"/>
+                    <Button x:Name="SyncButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Toggle auto-scrolling of list view" Grid.Column="3" Click="OnToggleSync">
+                        <Border>
+                            <Border.RenderTransform>
+                                <TransformGroup>
+                                    <RotateTransform Angle="90"/>
+                                    <TranslateTransform X="20"/>
+                                </TransformGroup>
+                            </Border.RenderTransform>
+                            <TextBlock Text="&#xE174;"/>
+                        </Border>
+                    </Button>
                 </Grid>
             </Grid>
 
@@ -114,7 +126,8 @@
             <ListView x:Name="TranscriptView" Grid.Column="2" Background="{StaticResource ControlBackgroundBrush}" Grid.Row="1" BorderThickness="0"
                   ItemTemplate="{StaticResource TranscriptDataTemplate}"
                       ItemContainerStyle="{StaticResource ListItemStretch}"
-                      SizeChanged="OnListSizeChanged" ScrollViewer.ScrollChanged="OnListScrollChanged"                      
+                      SizeChanged="OnListSizeChanged" ScrollViewer.ScrollChanged="OnListScrollChanged"
+                      SelectionChanged="OnListSelectionChanged"
                       >
 
             </ListView>

@@ -12,3 +12,19 @@ done click the save button on the toolbar to save the updated
 SRT file.
 
 ![](screenshot.png)
+
+## Installation
+
+To install the app follow this [Clickonce Install Link](http://lovettsoftware.com/downloads/TelepromptEditor/setup.exe).
+
+Your web browser will download this file which you can then open.
+You should see the following dialog:
+
+![install](install.png)
+
+Please be sure to check the "Publisher" is listed as "Chris Lovett".
+
+## Questions
+
+For questions and issues please use the
+[github issues list](https://github.com/lovettchris/TelepromptEditor).
