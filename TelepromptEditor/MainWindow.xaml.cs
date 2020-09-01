@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using Teleprompter.Controls;
 
 namespace Teleprompter
 {
@@ -181,7 +182,7 @@ namespace Teleprompter
             {
                 try
                 {
-                    model.LoadSrt(filename, TranscriptView.ActualWidth - 15);
+                    model.LoadSrt(filename, TranscriptView.ActualWidth > 15 ? TranscriptView.ActualWidth - 15 : TranscriptView.ActualWidth);
                 }
                 catch (Exception ex)
                 {
@@ -369,8 +370,9 @@ namespace Teleprompter
 
         private void OnUpdateTextWidth()
         {
-            double newWidth = TranscriptView.ActualWidth - 15;
-            if (listScrollerVisible)
+            double newWidth = TranscriptView.ActualWidth;
+            if (newWidth > 15) newWidth -= 15;
+            if (listScrollerVisible && newWidth > 20)
             {
                 newWidth -= 20;
             }
@@ -446,5 +448,17 @@ namespace Teleprompter
             base.OnClosing(e);
         }
 
+        private void OnQuickFilterValueChanged(object sender, string filter)
+        {
+            this.delayedActions.StartDelayedAction("Filter", () => { model.SetFilter(filter); }, TimeSpan.FromMilliseconds(250));
+        }
+
+        private void OnListViewPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                QuickFilter.FocusTextBox();
+            }
+        }
     }
 }

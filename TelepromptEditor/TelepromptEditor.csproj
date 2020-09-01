@@ -98,18 +98,33 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="DelayedAction.cs" />
-    <Compile Include="EditableTextBlock.xaml.cs">
+    <Compile Include="Controls\CloseBox.xaml.cs">
+      <DependentUpon>CloseBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\CustomizableButton.cs" />
+    <Compile Include="Controls\QuickFilterControl.xaml.cs">
+      <DependentUpon>QuickFilterControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\DelayedAction.cs" />
+    <Compile Include="Controls\EditableTextBlock.xaml.cs">
       <DependentUpon>EditableTextBlock.xaml</DependentUpon>
     </Compile>
-    <Compile Include="IsolatedStorage.cs" />
-    <Compile Include="SelectedColorConverter.cs" />
-    <Compile Include="Settings.cs" />
-    <Compile Include="TranscriptEntry.cs" />
-    <Compile Include="TranscriptModel.cs" />
-    <Compile Include="UiDispatcher.cs" />
-    <Compile Include="XamlExtensions.cs" />
-    <Page Include="EditableTextBlock.xaml">
+    <Compile Include="Utilities\IsolatedStorage.cs" />
+    <Compile Include="Controls\SelectedColorConverter.cs" />
+    <Compile Include="Model\Settings.cs" />
+    <Compile Include="Model\TranscriptEntry.cs" />
+    <Compile Include="Model\TranscriptModel.cs" />
+    <Compile Include="Utilities\UiDispatcher.cs" />
+    <Compile Include="Utilities\XamlExtensions.cs" />
+    <Page Include="Controls\CloseBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\EditableTextBlock.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\QuickFilterControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

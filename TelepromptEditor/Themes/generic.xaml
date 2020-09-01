@@ -18,7 +18,7 @@
     <Color x:Key="ControlPressedBorderColor">White</Color>
     <Color x:Key="ControlDisabledColor">#1D1D20</Color>
     <Color x:Key="ControlDisabledForegroundColor">#C0C0C0</Color>
-
+    
     <SolidColorBrush x:Key="ControlMouseOverBrush" Color="{StaticResource ControlMouseOverColor}"/>
     <SolidColorBrush x:Key="ControlPressedBrush" Color="{StaticResource ControlPressedColor}"/>
     <SolidColorBrush x:Key="ControlBackgroundBrush" Color="{StaticResource ControlBackgroundColor}"/>
@@ -26,6 +26,17 @@
     <SolidColorBrush x:Key="DefaultButtonBorderBrush" Color="{StaticResource ControlPressedColor}"/>
     <SolidColorBrush x:Key="ControlFocusVisualBrush" Color="white"/>
 
+    <!-- quick filter control -->
+    <SolidColorBrush x:Key="NormalBorderBrush" Color="{StaticResource ControlMouseOverColor}"/>
+    <SolidColorBrush x:Key="QuickFilterBackgroundBrush"  Color="#3F3F46"/>
+    <SolidColorBrush x:Key="GlyphBrush" Color="#F1F1F1"/>
+    
+    <Style x:Key="QuickFilderBorder" TargetType="{x:Type Border}">
+        <Setter Property="CornerRadius" Value="0"/>
+        <Setter Property="Padding" Value="4,0,4,0"/>
+        <Setter Property="BorderThickness" Value=".5"/>
+    </Style>
+    
     <clr:String x:Key="BackButtonGlyph">&#xE071;</clr:String>
     <clr:String x:Key="BackButtonSnappedGlyph">&#xE0BA;</clr:String>
 

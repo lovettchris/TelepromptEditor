@@ -14,14 +14,15 @@ namespace Teleprompter
         string fileName;
         TranscriptEntry selected;
         bool dirty;
-        ObservableCollection<TranscriptEntry> _entries = new ObservableCollection<TranscriptEntry>();
+        List<TranscriptEntry> _data; // the unfiltered data.
+        ObservableCollection<TranscriptEntry> _filtered = new ObservableCollection<TranscriptEntry>();
 
         public string FileName {  get { return this.fileName; } }
 
         public ObservableCollection<TranscriptEntry> Entries
         {
-            get { return _entries; }
-            set { _entries = value; NotifyChanged("Entries"); }
+            get { return _filtered; }
+            set { _filtered = value; NotifyChanged("Entries"); }
         }
 
         public bool Dirty
@@ -43,34 +44,34 @@ namespace Teleprompter
         internal TranscriptEntry FindEntry(double seconds)
         {
             // binary search for item containing this time.
-            if (_entries.Count == 0)
+            if (_filtered.Count == 0)
             {
                 return null;
             }
 
-            return BinaryFind(seconds, 0, _entries.Count);
+            return BinaryFind(seconds, 0, _filtered.Count);
         }
 
         private TranscriptEntry BinaryFind(double seconds, int start, int end)
         {
-            if (_entries.Count == 0)
+            if (_filtered.Count == 0)
             {
                 return null;
             }
             if (start == end)
             {
-                return _entries[start];
+                return _filtered[start];
             }
             if (start + 1 == end)
             {
-                var e = _entries[start];
+                var e = _filtered[start];
                 if (e.Contains(seconds))
                 {
                     return e;
                 }
-                if (end < _entries.Count)
+                if (end < _filtered.Count)
                 {
-                    var f = _entries[end];
+                    var f = _filtered[end];
                     if (f.Contains(seconds))
                     {
                         return f;
@@ -80,7 +81,7 @@ namespace Teleprompter
             else
             {
                 int mid = (start + end) / 2;
-                var x = _entries[mid];
+                var x = _filtered[mid];
                 if (seconds < x.StartSeconds)
                 {
                     // must be in first half then.
@@ -132,6 +133,8 @@ namespace Teleprompter
                 entries.Add(e);
             }
 
+            this._data = entries;
+
             this.Entries.Clear();
             foreach (var e in entries)
             {
@@ -163,7 +166,7 @@ namespace Teleprompter
         internal void Save(TextWriter writer)
         { 
             int index = 1;
-            foreach(var e in this._entries)
+            foreach(var e in this._filtered)
             {
                 writer.Write(index.ToString());
                 writer.Write('\n');
@@ -197,6 +200,18 @@ namespace Teleprompter
                 if (entry != null)
                 {
                     entry.Selected = true;
+                }
+            }
+        }
+
+        internal void SetFilter(string filter)
+        {
+            this.Entries.Clear();
+            foreach (var e in _data)
+            {
+                if (e.Prompt != null && e.Prompt.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    this.Entries.Add(e);
                 }
             }
         }
