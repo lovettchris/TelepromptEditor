@@ -1,0 +1,20 @@
+﻿1
+00:00:00,000 --> 00:00:05
+This animation shows messages passing through a highly parallel distributed system.
+
+2
+00:00:05 --> 00:00:09
+Each node represents a micro-service or a piece of code running on some machine.
+
+3
+00:00:09 --> 00:00:15
+Messages are flying through this system in a way that is hard to debug when something goes wrong.
+
+4
+00:00:15 --> 00:00:23
+Coyote tests one async path at a time exploring all possible paths through the system and it does this very quickly.
+
+5
+00:00:23 --> 00:00:29
+It also records this path so that when it finds a bug that bug is 100% reproducible.
+
