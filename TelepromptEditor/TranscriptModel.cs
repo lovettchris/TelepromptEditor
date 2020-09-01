@@ -13,6 +13,7 @@ namespace Teleprompter
     {
         string fileName;
         TranscriptEntry selected;
+        bool dirty;
         ObservableCollection<TranscriptEntry> _entries = new ObservableCollection<TranscriptEntry>();
 
         public string FileName {  get { return this.fileName; } }
@@ -21,6 +22,12 @@ namespace Teleprompter
         {
             get { return _entries; }
             set { _entries = value; NotifyChanged("Entries"); }
+        }
+
+        public bool Dirty
+        {
+            get { return dirty; }
+            set { this.dirty = value; NotifyChanged("Dirty"); }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -120,7 +127,9 @@ namespace Teleprompter
                     pos++;
                 }
 
-                entries.Add(new TranscriptEntry(index, range, prompt) { Width = width });
+                var e = new TranscriptEntry(index, range, prompt) { Width = width };
+                e.PropertyChanged += OnEntryChanged;
+                entries.Add(e);
             }
 
             this.Entries.Clear();
@@ -129,7 +138,16 @@ namespace Teleprompter
                 this.Entries.Add(e);
             }
 
+            this.Dirty = false;
             selected = null;
+        }
+
+        private void OnEntryChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Prompt")
+            {
+                this.Dirty = true;
+            }
         }
 
         internal void Save(string filename)
@@ -139,6 +157,7 @@ namespace Teleprompter
                 Save(writer);
             }
             this.fileName = filename;
+            this.Dirty = false;
         }
 
         internal void Save(TextWriter writer)

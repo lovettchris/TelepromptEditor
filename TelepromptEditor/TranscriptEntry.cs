@@ -54,7 +54,14 @@ namespace Teleprompter
         public string Prompt
         {
             get { return this.prompt; }
-            set { this.prompt = value; NotifyChanged("Prompt"); }
+            set
+            {
+                if (this.prompt != value)
+                {
+                    this.prompt = value;
+                    NotifyChanged("Prompt");
+                }
+            }
         }
 
         public double StartSeconds

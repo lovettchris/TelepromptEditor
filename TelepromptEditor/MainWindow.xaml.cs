@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
 namespace Teleprompter
@@ -30,6 +31,7 @@ namespace Teleprompter
             TranscriptView.ItemsSource = model.Entries;
             UpdateButtons();
             this.Visibility = Visibility.Hidden;
+            this.model.PropertyChanged += OnModelChanged;
 
             Task.Run(async () =>
             {
@@ -37,6 +39,20 @@ namespace Teleprompter
                 this.settings.PropertyChanged += OnSettingsPropertyChanged;
                 UiDispatcher.RunOnUIThread(RestoreSettings);
             });
+        }
+
+        private void OnModelChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(model.FileName))
+            {
+                string name = System.IO.Path.GetFileNameWithoutExtension(model.FileName);
+                var title = "TelepromptEditor - " + name;
+                if (model.Dirty)
+                {
+                    title += "*";
+                }
+                this.Title = title;
+            }
         }
 
         private void RestoreSettings()
@@ -387,12 +403,29 @@ namespace Teleprompter
         private void OnItemEditing(object sender, EventArgs e)
         {
             EditableTextBlock block = (EditableTextBlock)sender;
-            TranscriptEntry entry = (TranscriptEntry)block.DataContext;
-            TranscriptView.SelectedItem = entry;
+            TranscriptEntry entry = block.DataContext as TranscriptEntry;
+            if (entry != null)
+            {
+                TranscriptView.SelectedItem = entry;
+            }
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
+            if (model.Dirty)
+            {
+                var rc = MessageBox.Show("You have unsaved changes, would you like to save the SRT file?", "Unsaved Changed", MessageBoxButton.YesNoCancel);
+                if (rc == MessageBoxResult.Yes)
+                {
+                    this.model.Save(this.model.FileName);
+                }
+                else if (rc == MessageBoxResult.Cancel)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+
             if (this.settings != null)
             {
                 this.settings.WindowSize = this.RestoreBounds.Size;
