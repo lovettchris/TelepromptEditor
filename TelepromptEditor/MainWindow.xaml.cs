@@ -21,7 +21,7 @@ namespace Teleprompter
     {
         TranscriptModel model = new TranscriptModel();
         DelayedActions delayedActions = new DelayedActions();
-        bool syncPositions = true;
+        bool syncPositions;
         double pendingSeek;
         Settings settings;
 
@@ -33,6 +33,7 @@ namespace Teleprompter
             UpdateButtons();
             this.Visibility = Visibility.Hidden;
             this.model.PropertyChanged += OnModelChanged;
+            this.syncPositions = SyncButton.IsChecked == true;
 
             Task.Run(async () =>
             {
@@ -390,7 +391,7 @@ namespace Teleprompter
 
         private void OnToggleSync(object sender, RoutedEventArgs e)
         {
-            syncPositions = !syncPositions;
+            syncPositions = SyncButton.IsChecked == true;
         }
 
         private void OnListSelectionChanged(object sender, SelectionChangedEventArgs e)

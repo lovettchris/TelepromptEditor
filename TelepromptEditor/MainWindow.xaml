@@ -101,8 +101,8 @@
 
             <Grid Grid.Column="0" Grid.Row="1" VerticalAlignment="Top">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <MediaElement x:Name="VideoPlayer" Source="" 
                               MediaEnded="OnMediaEnded" LoadedBehavior="Manual" UnloadedBehavior="Stop"
@@ -119,7 +119,8 @@
                     <Button x:Name="PauseButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Pause" Grid.Column="1" Click="OnPause">&#xE103;</Button>
                     <Slider x:Name="PositionSlider" Margin="0,5,5,5" Minimum="0" Maximum="100" Grid.Column="2" ValueChanged="OnSliderMoved"
                             VerticalAlignment="Center"/>
-                    <Button x:Name="SyncButton" Style="{StaticResource AppBarButtonStyle}" ToolTip="Toggle auto-scrolling of list view" Grid.Column="3" Click="OnToggleSync">
+                    <ToggleButton x:Name="SyncButton" Style="{StaticResource AppBarToggleButtonStyle}" ToolTip="Toggle auto-scrolling of list view" Grid.Column="3" 
+                                  Checked="OnToggleSync" Unchecked="OnToggleSync" IsChecked="True">
                         <Border>
                             <Border.RenderTransform>
                                 <TransformGroup>
@@ -129,7 +130,7 @@
                             </Border.RenderTransform>
                             <TextBlock Text="&#xE174;"/>
                         </Border>
-                    </Button>
+                    </ToggleButton>
                 </Grid>
             </Grid>
 
